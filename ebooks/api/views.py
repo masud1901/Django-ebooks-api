@@ -1,9 +1,10 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, mixins
+from rest_framework import permissions
 
 from ebooks.models import Ebook, Review
 from ebooks.api.serializers import ReviewSerializer, EbookSerializer
-
+from ebooks.api.permissions import IsAdminUserOrReadOnly
 
 # class EbookListCreateAPIView(
 #     generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin
@@ -21,11 +22,13 @@ from ebooks.api.serializers import ReviewSerializer, EbookSerializer
 class EbookListCreateAPIView(generics.ListCreateAPIView):
     queryset = Ebook.objects.all()
     serializer_class = EbookSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
 
 
 class EbookDetailsAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Ebook.objects.all()
     serializer_class = EbookSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
 
 
 class ReviewCreateAPIView(generics.ListCreateAPIView):
