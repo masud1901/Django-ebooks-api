@@ -3,9 +3,10 @@ from rest_framework import generics, mixins
 from rest_framework import permissions
 from rest_framework.exceptions import ValidationError
 
+from ebooks.api.pagination import SmallSetPagination
 from ebooks.models import Ebook, Review
 from ebooks.api.serializers import ReviewSerializer, EbookSerializer
-from ebooks.api.permissions import IsAdminUserOrReadOnly,IsReviewAuthorOrReadOnly
+from ebooks.api.permissions import IsAdminUserOrReadOnly, IsReviewAuthorOrReadOnly
 
 # class EbookListCreateAPIView(
 #     generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin
@@ -21,9 +22,10 @@ from ebooks.api.permissions import IsAdminUserOrReadOnly,IsReviewAuthorOrReadOnl
 
 
 class EbookListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Ebook.objects.all()
+    queryset = Ebook.objects.all().order_by("-id")
     serializer_class = EbookSerializer
     permission_classes = [IsAdminUserOrReadOnly]
+    pagination_class = SmallSetPagination
 
 
 class EbookDetailsAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -43,7 +45,9 @@ class ReviewCreateAPIView(generics.CreateAPIView):
 
         review_author = self.request.user
 
-        review_queryset = Review.objects.filter(ebook=ebook, review_author=review_author)
+        review_queryset = Review.objects.filter(
+            ebook=ebook, review_author=review_author
+        )
         if review_queryset.exists():
             raise ValidationError(
                 {"review_author": ["You have already written a review for this ebook."]}
@@ -56,4 +60,3 @@ class ReviewDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [IsReviewAuthorOrReadOnly]
- 
